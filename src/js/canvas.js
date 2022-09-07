@@ -1,7 +1,9 @@
+import { placementTitlesData } from "./placementTitles.js";
 import { waypoints } from "./waypoints.js";
+import { PlacementTile, Enemy, Building } from "./classes.js";
 
-const canvas = document.querySelector("canvas");
-const c = canvas.getContext("2d");
+export const canvas = document.querySelector("canvas");
+export const c = canvas.getContext("2d");
 
 canvas.width = 1280;
 canvas.height = 768;
@@ -26,68 +28,57 @@ map.onload = () => {
   animate();
 };
 //how we set the src of our map
-map.src = "/img/map.png";
+map.src = "/img/newMap.png";
 
-//Enemy class
-class Enemy {
-  constructor({ position = { x: 0, y: 0 } }) {
-    this.position = position;
-    this.width = 100;
-    this.height = 100;
-    //reference to our waypoints js
-    this.waypointIndex = 0;
-    //how we center our squares on our waypoint so they aren't off center
-    this.center = {
-      x: this.position.x + this.width / 2,
-      y: this.position.y + this.height / 2,
-    };
-  }
+//create a 2d map of our placement tiles
+const placementTilesData2D = [];
 
-  draw() {
-    c.fillStyle = "red";
-    c.fillRect(this.position.x, this.position.y, this.width, this.height);
-  }
-
-  update() {
-    this.draw();
-
-    //variable for our waypoints
-    const waypoint = waypoints[this.waypointIndex];
-    //x and y distance for our Math.atan2 method
-    const yDistance = waypoint.y - this.center.y;
-    const xDistance = waypoint.x - this.center.x;
-    //this formula always needs y before x
-    const angle = Math.atan2(yDistance, xDistance);
-
-    // this.position.x += 1;
-    //cos(r) === x
-    //sin(r) === y
-    this.position.x += Math.cos(angle);
-    this.position.y += Math.sin(angle);
-
-    //code for centering our enemys on our waypoint line
-    this.center = {
-      x: this.position.x + this.width / 2,
-      y: this.position.y + this.height / 2,
-    };
-
-    //how we move from waypoint to waypoint, through our waypoints array
-    if (
-      Math.round(this.center.x) === waypoint.x &&
-      Math.round(this.center.y) === waypoint.y &&
-      this.waypointIndex < waypoints.length - 1
-    ) {
-      this.waypointIndex++;
-    }
-  }
+//split that map into rows of 20 all up 12 rows
+for (let i = 0; i < placementTitlesData.length; i += 20) {
+  //we slice i, i + 20 to get our rows
+  placementTilesData2D.push(placementTitlesData.slice(i, i + 20));
 }
 
-const enemys = [];
+const placementTiles = [];
 
-const enemy = new Enemy({ position: { x: waypoints[0].x, y: waypoints[0].y } });
-const enemy2 = new Enemy({
-  position: { x: waypoints[0].x - 150, y: waypoints[0].y },
+//we then forEach
+placementTilesData2D.forEach((row, y) => {
+  row.forEach((placement, x) => {
+    if (placement === 14) {
+      //add building placement tile here
+      placementTiles.push(
+        new PlacementTile({
+          position: {
+            x: x * 64,
+            y: y * 64,
+          },
+        })
+      );
+    }
+  });
 });
+
+const enemies = [];
+for (let i = 1; i < 10; i++) {
+  const xOffset = i * 150;
+
+  enemies.push(
+    new Enemy({
+      position: {
+        x: waypoints[0].x - xOffset,
+        y: waypoints[0].y,
+      },
+    })
+  );
+}
+
+// const enemy = new Enemy({ position: { x: waypoints[0].x, y: waypoints[0].y } });
+// const enemy2 = new Enemy({
+//   position: { x: waypoints[0].x - 250, y: waypoints[0].y },
+// });
+
+const buildings = [];
+let activeTile = undefined;
 
 //animation function
 function animate() {
@@ -97,6 +88,55 @@ function animate() {
   //drawing our map into our canvas
   c.drawImage(map, 0, 0);
 
-  enemy.update();
-  enemy2.update();
+  enemies.forEach((enemy) => {
+    enemy.update();
+  });
+
+  placementTiles.forEach((tile) => {
+    tile.update(mouse);
+  });
+
+  buildings.forEach((building) => {
+    building.draw();
+  });
 }
+
+export const mouse = {
+  x: undefined,
+  y: undefined,
+};
+
+canvas.addEventListener("click", (e) => {
+  if (activeTile && !activeTile.isOccupied) {
+    buildings.push(
+      new Building({
+        position: {
+          x: activeTile.position.x,
+          y: activeTile.position.y,
+        },
+      })
+    );
+    activeTile.isOccupied = true;
+    console.log(activeTile);
+    console.log(buildings);
+  }
+});
+
+window.addEventListener("mousemove", (e) => {
+  mouse.x = e.clientX;
+  mouse.y = e.clientY;
+
+  activeTile = null;
+  for (let i = 0; i < placementTiles.length; i++) {
+    const tile = placementTiles[i];
+    if (
+      mouse.x > tile.position.x &&
+      mouse.x < tile.position.x + tile.size &&
+      mouse.y > tile.position.y &&
+      mouse.y < tile.position.y + tile.size
+    ) {
+      activeTile = tile;
+      break;
+    }
+  }
+});
