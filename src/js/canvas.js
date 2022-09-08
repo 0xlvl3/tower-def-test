@@ -1,6 +1,6 @@
 import { placementTitlesData } from "./placementTitles.js";
 import { waypoints } from "./waypoints.js";
-import { PlacementTile, Enemy, Building } from "./classes.js";
+import { PlacementTile, Enemy, Building, Projectile } from "./classes.js";
 
 export const canvas = document.querySelector("canvas");
 export const c = canvas.getContext("2d");
@@ -58,9 +58,9 @@ placementTilesData2D.forEach((row, y) => {
   });
 });
 
-const enemies = [];
+export const enemies = [];
 for (let i = 1; i < 10; i++) {
-  const xOffset = i * 150;
+  const xOffset = i * 200;
 
   enemies.push(
     new Enemy({
@@ -77,7 +77,7 @@ for (let i = 1; i < 10; i++) {
 //   position: { x: waypoints[0].x - 250, y: waypoints[0].y },
 // });
 
-const buildings = [];
+export const buildings = [];
 let activeTile = undefined;
 
 //animation function
@@ -97,7 +97,40 @@ function animate() {
   });
 
   buildings.forEach((building) => {
-    building.draw();
+    building.update();
+    //target is set to null first this will be used with collision detection with our buildings
+    building.target = null;
+
+    //how we detect collision between enemy and buildings
+    const validEnemies = enemies.filter((enemy) => {
+      //same as collision between our projectile and enemy
+      const xDifference = enemy.center.x - building.center.x;
+      const yDifference = enemy.center.y - building.center.y;
+      const distance = Math.hypot(xDifference, yDifference);
+
+      return distance < enemy.radius + building.radius;
+    });
+
+    building.target = validEnemies[0];
+
+    //we replaced our forEach loop with a for loop so our projectile rendered correctly
+    // building.projectiles.forEach((projectile, i) -- originally
+    for (let i = building.projectiles.length - 1; i >= 0; i--) {
+      const projectile = building.projectiles[i];
+
+      projectile.update();
+
+      //how to detect for enemy collision
+      //this is how you get the distance between projectile and enemy
+      const xDifference = projectile.enemy.center.x - projectile.position.x;
+      const yDifference = projectile.enemy.center.y - projectile.position.y;
+      const distance = Math.hypot(xDifference, yDifference);
+
+      //remove our projectile once it comes in contact with radius + radius
+      if (distance < projectile.enemy.radius + projectile.radius) {
+        building.projectiles.splice(i, 1);
+      }
+    }
   });
 }
 
