@@ -59,19 +59,21 @@ placementTilesData2D.forEach((row, y) => {
 });
 
 export const enemies = [];
-for (let i = 1; i < 10; i++) {
-  const xOffset = i * 200;
+function spawnEnemies() {
+  for (let i = 1; i < 10; i++) {
+    const xOffset = i * 200;
 
-  enemies.push(
-    new Enemy({
-      position: {
-        x: waypoints[0].x - xOffset,
-        y: waypoints[0].y,
-      },
-    })
-  );
+    enemies.push(
+      new Enemy({
+        position: {
+          x: waypoints[0].x - xOffset,
+          y: waypoints[0].y,
+        },
+      })
+    );
+  }
 }
-
+spawnEnemies();
 // const enemy = new Enemy({ position: { x: waypoints[0].x, y: waypoints[0].y } });
 // const enemy2 = new Enemy({
 //   position: { x: waypoints[0].x - 250, y: waypoints[0].y },
@@ -88,9 +90,10 @@ function animate() {
   //drawing our map into our canvas
   c.drawImage(map, 0, 0);
 
-  enemies.forEach((enemy) => {
+  for (let i = enemies.length - 1; i >= 0; i--) {
+    const enemy = enemies[i];
     enemy.update();
-  });
+  }
 
   placementTiles.forEach((tile) => {
     tile.update(mouse);
@@ -126,8 +129,24 @@ function animate() {
       const yDifference = projectile.enemy.center.y - projectile.position.y;
       const distance = Math.hypot(xDifference, yDifference);
 
-      //remove our projectile once it comes in contact with radius + radius
+      //this is when our projectile hits an enemy, once hit it removes projectile
       if (distance < projectile.enemy.radius + projectile.radius) {
+        //how we get enemy health
+        // projectile.enemy.health;
+        //enemy hit takes -20 to health
+        projectile.enemy.health -= 20;
+        //if enemy health is gone
+        if (projectile.enemy.health <= 0) {
+          const enemyIndex = enemies.findIndex((enemy) => {
+            return projectile.enemy === enemy;
+          });
+
+          //random enemies will not be removed because of this if
+          if (enemyIndex > -1) {
+            enemies.splice(enemyIndex, 1);
+          }
+        }
+
         building.projectiles.splice(i, 1);
       }
     }
