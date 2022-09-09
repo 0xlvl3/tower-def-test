@@ -4,6 +4,8 @@ import { PlacementTile, Enemy, Building, Projectile } from "./classes.js";
 
 export const canvas = document.querySelector("canvas");
 export const c = canvas.getContext("2d");
+const gameOver = document.querySelector(".gameOver");
+const heartsCount = document.querySelector(".heartCount");
 
 canvas.width = 1280;
 canvas.height = 768;
@@ -59,8 +61,16 @@ placementTilesData2D.forEach((row, y) => {
 });
 
 export const enemies = [];
-function spawnEnemies() {
-  for (let i = 1; i < 10; i++) {
+/**
+ * spawnEnemies will spawn amount of enemies declared in parameters
+ * @param {int} spawnCount 
+
+ */
+function spawnEnemies(spawnCount) {
+  //use for loop so render doesn't mess up
+  //we +1 on spawn count since we start on 1 within our loop
+  for (let i = 1; i < spawnCount + 1; i++) {
+    //xOffset is how far between spawns enemies will spawn
     const xOffset = i * 200;
 
     enemies.push(
@@ -73,7 +83,6 @@ function spawnEnemies() {
     );
   }
 }
-spawnEnemies();
 // const enemy = new Enemy({ position: { x: waypoints[0].x, y: waypoints[0].y } });
 // const enemy2 = new Enemy({
 //   position: { x: waypoints[0].x - 250, y: waypoints[0].y },
@@ -82,10 +91,18 @@ spawnEnemies();
 export const buildings = [];
 let activeTile = undefined;
 
+//will be used within spawnEnemies as our counter
+let enemyCount = 3;
+spawnEnemies(enemyCount);
+
+//life counter
+let lifeCount = 10;
+
 //animation function
 function animate() {
   //the method that animates our game, through recursive
-  requestAnimationFrame(animate);
+  //stored in const for the animation ID used within ----
+  const animationID = requestAnimationFrame(animate);
 
   //drawing our map into our canvas
   c.drawImage(map, 0, 0);
@@ -93,6 +110,29 @@ function animate() {
   for (let i = enemies.length - 1; i >= 0; i--) {
     const enemy = enemies[i];
     enemy.update();
+
+    //when enemy goes off map
+    if (enemy.position.x > canvas.width) {
+      //remove enemy from map
+      enemies.splice(i, 1);
+
+      //take 1 life
+      lifeCount -= 1;
+      heartsCount.innerHTML = lifeCount;
+      if (lifeCount === 0) {
+        //cancelAnimationFrame takes the animationID as an argu, and will pause the game when we reach 0 lifeCount
+        cancelAnimationFrame(animationID);
+        gameOver.style.display = "flex";
+      }
+    }
+
+    //tracking total amount of enemies
+    if (enemies.length === 0) {
+      //increase total amount of enemies per wave
+      enemyCount += 2;
+      //if 0 spawn respawn enemies
+      spawnEnemies(enemyCount);
+    }
   }
 
   placementTiles.forEach((tile) => {

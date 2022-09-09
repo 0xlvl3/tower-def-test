@@ -45,6 +45,9 @@ export class Enemy {
     };
     this.radius = 50;
     this.health = 100;
+
+    //used for the speed of our enemies
+    this.velocity = { x: 0, y: 0 };
   }
 
   draw() {
@@ -83,8 +86,15 @@ export class Enemy {
     // this.position.x += 1;
     //cos(r) === x
     //sin(r) === y
-    this.position.x += Math.cos(angle);
-    this.position.y += Math.sin(angle);
+
+    //variables we will use to increase the speed of our enemies
+    const speed = 10;
+    this.velocity.x = Math.cos(angle) * speed;
+    this.velocity.y = Math.sin(angle) * speed;
+
+    //how we speed our enemies up
+    this.position.x += this.velocity.x;
+    this.position.y += this.velocity.y;
 
     //code for centering our enemys on our waypoint line
     this.center = {
@@ -94,8 +104,11 @@ export class Enemy {
 
     //how we move from waypoint to waypoint, through our waypoints array
     if (
-      Math.round(this.center.x) === waypoint.x &&
-      Math.round(this.center.y) === waypoint.y &&
+      //
+      Math.abs(Math.round(this.center.x) - waypoint.x) <
+        Math.abs(this.velocity.x) &&
+      Math.abs(Math.round(this.center.y) - waypoint.y) <
+        Math.abs(this.velocity.y) &&
       this.waypointIndex < waypoints.length - 1
     ) {
       this.waypointIndex++;
