@@ -1,4 +1,4 @@
-* {
+/* * {
   font-family: "Changa One", cursive;
   -webkit-text-stroke: 2px black;
 }
@@ -6,6 +6,20 @@
 body {
   background-color: black;
   margin: 0;
+}
+
+.resourceBackground {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 200px;
+  height: 80px;
+  background: linear-gradient(
+    to left bottom,
+    rgba(0, 0, 0, 0.8),
+    rgba(0, 0, 0, 0),
+    rgba(0, 0, 0, 0)
+  );
 }
 
 .container {
@@ -17,10 +31,29 @@ canvas {
   border: 2px solid black;
 }
 
+.resources {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  top: 4px;
+  right: 8px;
+  font-size: 36px;
+  color: #fff;
+  -webkit-text-stroke: 2px black;
+  margin: 10px;
+}
+
+.coin {
+  color: yellow;
+  width: 25px;
+  margin-right: 10px;
+}
+
 .heart {
   color: red;
   width: 35px;
-  margin-right: 5px;
+  margin-right: 10px;
+  margin-left: 5px;
 }
 
 .gameOver {
@@ -39,12 +72,11 @@ canvas {
 }
 
 .life {
-  position: absolute;
   display: flex;
   align-items: center;
-  top: 4px;
-  right: 8px;
-  font-size: 36px;
-  color: #fff;
-  -webkit-text-stroke: 2px black;
 }
+
+.coins {
+  display: flex;
+  align-items: center;
+} */

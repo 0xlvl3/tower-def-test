@@ -1,10 +1,6 @@
-import { placementTitlesData } from "./placementTitles.js";
-import { waypoints } from "./waypoints.js";
-import { PlacementTile, Enemy, Building, Projectile } from "./classes.js";
+const canvas = document.querySelector("canvas");
+const c = canvas.getContext("2d");
 
-export const canvas = document.querySelector("canvas");
-export const c = canvas.getContext("2d");
-const gameOver = document.querySelector(".gameOver");
 const heartsCount = document.querySelector(".heartCount");
 
 canvas.width = 1280;
@@ -13,32 +9,13 @@ canvas.height = 768;
 c.fillStyle = "white";
 c.fillRect(0, 0, canvas.width, canvas.height);
 
-/**
- *  HOW TO IMPORT A MAP IMAGE INTO CANVAS
- * -----------------------------------------
- *  const image = new Image();
- *  image.onload = () = {
- *  c.drawImage(image, width, height)
- *  }
- *  image.src = 'img/image.png'
- * -----------------------------------------
- */
-//drawing our map into our canvas
-const map = new Image();
-//we call c.drawImage within our animate loop
-map.onload = () => {
-  animate();
-};
-//how we set the src of our map
-map.src = "/img/newMap.png";
-
 //create a 2d map of our placement tiles
 const placementTilesData2D = [];
 
 //split that map into rows of 20 all up 12 rows
-for (let i = 0; i < placementTitlesData.length; i += 20) {
+for (let i = 0; i < placementTilesData.length; i += 20) {
   //we slice i, i + 20 to get our rows
-  placementTilesData2D.push(placementTitlesData.slice(i, i + 20));
+  placementTilesData2D.push(placementTilesData.slice(i, i + 20));
 }
 
 const placementTiles = [];
@@ -60,7 +37,31 @@ placementTilesData2D.forEach((row, y) => {
   });
 });
 
-export const enemies = [];
+/**
+ *  HOW TO IMPORT A MAP IMAGE INTO CANVAS
+ * -----------------------------------------
+ *  const image = new Image();
+ *  image.onload = () = {
+ *  c.drawImage(image, width, height)
+ *  }
+ *  image.src = 'img/image.png'
+ * -----------------------------------------
+ */
+//drawing our map into our canvas
+const image = new Image();
+//we call c.drawImage within our animate loop
+image.onload = () => {
+  animate();
+};
+//how we set the src of our image
+image.src = "/img/newMap.png";
+
+const mouse = {
+  x: undefined,
+  y: undefined,
+};
+
+const enemies = [];
 /**
  * spawnEnemies will spawn amount of enemies declared in parameters
  * @param {int} spawnCount 
@@ -71,7 +72,7 @@ function spawnEnemies(spawnCount) {
   //we +1 on spawn count since we start on 1 within our loop
   for (let i = 1; i < spawnCount + 1; i++) {
     //xOffset is how far between spawns enemies will spawn
-    const xOffset = i * 200;
+    const xOffset = i * 150;
 
     enemies.push(
       new Enemy({
@@ -88,7 +89,7 @@ function spawnEnemies(spawnCount) {
 //   position: { x: waypoints[0].x - 250, y: waypoints[0].y },
 // });
 
-export const buildings = [];
+const buildings = [];
 let activeTile = undefined;
 
 //will be used within spawnEnemies as our counter
@@ -98,6 +99,9 @@ spawnEnemies(enemyCount);
 //life counter
 let lifeCount = 10;
 
+//coin counter
+let coins = 100;
+
 //animation function
 function animate() {
   //the method that animates our game, through recursive
@@ -105,7 +109,7 @@ function animate() {
   const animationID = requestAnimationFrame(animate);
 
   //drawing our map into our canvas
-  c.drawImage(map, 0, 0);
+  c.drawImage(image, 0, 0);
 
   for (let i = enemies.length - 1; i >= 0; i--) {
     const enemy = enemies[i];
@@ -122,7 +126,7 @@ function animate() {
       if (lifeCount === 0) {
         //cancelAnimationFrame takes the animationID as an argu, and will pause the game when we reach 0 lifeCount
         cancelAnimationFrame(animationID);
-        gameOver.style.display = "flex";
+        document.querySelector("#gameOver").style.display = "flex";
       }
     }
 
@@ -184,6 +188,8 @@ function animate() {
           //random enemies will not be removed because of this if
           if (enemyIndex > -1) {
             enemies.splice(enemyIndex, 1);
+            coins += 25;
+            document.querySelector("#coinCount").innerHTML = coins;
           }
         }
 
@@ -193,13 +199,12 @@ function animate() {
   });
 }
 
-export const mouse = {
-  x: undefined,
-  y: undefined,
-};
-
 canvas.addEventListener("click", (e) => {
-  if (activeTile && !activeTile.isOccupied) {
+  if (activeTile && !activeTile.isOccupied && coins - 50 >= 0) {
+    //how we subtract coins when we place a tower
+    coins -= 50;
+    document.querySelector(".coinCount").innerHTML = coins;
+
     buildings.push(
       new Building({
         position: {
