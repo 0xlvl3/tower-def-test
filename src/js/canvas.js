@@ -1,5 +1,13 @@
+import { placementTilesData } from "./placementTilesData.js";
+import { waypoints } from "./waypoints.js";
+import PlacementTile from "./classes/placementTile.js";
+import Enemy from "./classes/enemy.js";
+import Building from "./classes/Building.js";
+import Projectile from "./classes/projectile.js";
+import Sprite from "./classes/Sprite.js";
+
 const canvas = document.querySelector("canvas");
-const c = canvas.getContext("2d");
+export const c = canvas.getContext("2d");
 
 const heartsCount = document.querySelector(".heartCount");
 
@@ -56,7 +64,7 @@ image.onload = () => {
 //how we set the src of our image
 image.src = "/img/newMap.png";
 
-const mouse = {
+export const mouse = {
   x: undefined,
   y: undefined,
 };
@@ -92,15 +100,17 @@ function spawnEnemies(spawnCount) {
 const buildings = [];
 let activeTile = undefined;
 
-//will be used within spawnEnemies as our counter
-let enemyCount = 3;
-spawnEnemies(enemyCount);
+const explosions = [];
 
 //life counter
 let lifeCount = 10;
 
 //coin counter
 let coins = 100;
+
+//will be used within spawnEnemies as our counter
+let enemyCount = 3;
+spawnEnemies(enemyCount);
 
 //animation function
 function animate() {
@@ -130,12 +140,23 @@ function animate() {
       }
     }
 
+    for (let i = explosions.length - 1; i >= 0; i--) {
+      const explosion = explosions[i];
+      explosion.draw();
+      explosion.update();
+
+      if (explosion.frames.current >= explosion.frames.max - 1) {
+        explosions.splice(i, 1);
+      }
+    }
+
     //tracking total amount of enemies
     if (enemies.length === 0) {
       //increase total amount of enemies per wave
       enemyCount += 2;
       //if 0 spawn respawn enemies
       spawnEnemies(enemyCount);
+      console.log(enemyCount);
     }
   }
 
@@ -189,10 +210,18 @@ function animate() {
           if (enemyIndex > -1) {
             enemies.splice(enemyIndex, 1);
             coins += 25;
-            document.querySelector("#coinCount").innerHTML = coins;
+            document.querySelector(".coinCount").innerHTML = coins;
           }
         }
 
+        explosions.push(
+          new Sprite(
+            { x: projectile.position.x, y: projectile.position.y },
+            "/img/explosion.png",
+            { max: 4 },
+            { x: 0, y: 0 }
+          )
+        );
         building.projectiles.splice(i, 1);
       }
     }
@@ -214,8 +243,11 @@ canvas.addEventListener("click", (e) => {
       })
     );
     activeTile.isOccupied = true;
-    console.log(activeTile);
-    console.log(buildings);
+
+    //sort out our buildings z-index
+    buildings.sort((a, b) => {
+      return a.position.y - b.position.y;
+    });
   }
 });
 

@@ -1,12 +1,20 @@
-class Enemy extends Sprite {
+import Sprite from "./Sprite.js";
+import { c } from "../canvas.js";
+import { waypoints } from "../waypoints.js";
+import { placementTilesData } from "../placementTilesData.js";
+
+export default class Enemy extends Sprite {
   constructor({ position = { x: 0, y: 0 } }) {
-    super({
-      position,
-      imageSrc: "img/orc.png",
-      frames: {
-        max: 7,
+    super(
+      {
+        position,
       },
-    });
+      "/img/orc.png",
+      {
+        max: 7,
+      }
+    );
+
     this.position = position;
     this.width = 100;
     this.height = 100;
@@ -53,6 +61,7 @@ class Enemy extends Sprite {
 
   update() {
     this.draw();
+    super.update();
 
     //variable for our waypoints
     const waypoint = waypoints[this.waypointIndex];

@@ -1,6 +1,8 @@
-class Projectile extends Sprite {
+import Sprite from "./Sprite.js";
+
+export default class Projectile extends Sprite {
   constructor({ position = { x: 0, y: 0 }, enemy }) {
-    super({ position, imageSrc: "img/projectile.png" });
+    super({ position }, "/img/projectile.png");
 
     this.velocity = {
       x: 0,

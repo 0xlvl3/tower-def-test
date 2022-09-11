@@ -1,4 +1,6 @@
-class PlacementTile {
+import { c } from "../canvas.js";
+
+export default class PlacementTile {
   constructor({ position = { x: 0, y: 0 } }) {
     this.position = position;
     this.size = 64;
