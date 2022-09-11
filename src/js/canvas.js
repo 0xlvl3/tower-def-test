@@ -3,8 +3,8 @@ import { waypoints } from "./waypoints.js";
 import PlacementTile from "./classes/placementTile.js";
 import Enemy from "./classes/enemy.js";
 import Building from "./classes/Building.js";
-import Projectile from "./classes/projectile.js";
 import Sprite from "./classes/Sprite.js";
+import Projectile from "./classes/projectile.js";
 
 const canvas = document.querySelector("canvas");
 export const c = canvas.getContext("2d");

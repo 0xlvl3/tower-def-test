@@ -1,7 +1,6 @@
 import Sprite from "./Sprite.js";
 import { c } from "../canvas.js";
 import { waypoints } from "../waypoints.js";
-import { placementTilesData } from "../placementTilesData.js";
 
 export default class Enemy extends Sprite {
   constructor({ position = { x: 0, y: 0 } }) {
